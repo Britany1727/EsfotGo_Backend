@@ -14,13 +14,13 @@ const docenteSchema = new Schema({
     },
     N_Oficina:{
         type:String,
-        trim:true,
-        default:null
+        required:true,
+        trim:true
     },
     Tutorias:{
         type:String,
+        required:true,
         trim:true,
-        default:null
     },
     celular:{
         type:String,

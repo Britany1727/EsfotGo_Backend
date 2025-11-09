@@ -13,7 +13,7 @@ const sendMailToRegister = (userMail, token) => {
             Confirmar cuenta
             </a>
             <hr>
-            <footer>El equipo de SMARTVET te da la más cordial bienvenida.</footer>
+            <footer>El equipo de EsfotGo te da la más cordial bienvenida.</footer>
         `
     )
 }

@@ -1,7 +1,8 @@
 {
-  "name": "esfotgo",
+  "name": "api-esfot",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
