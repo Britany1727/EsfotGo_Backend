@@ -1,6 +1,6 @@
 
 import Docente from "../models/Docente.js"
-import { sendMailToRegister } from "../helpers/sendMail.js"
+import { sendMailToRecoveryPassword, sendMailToRegister } from "../helpers/sendMail.js"
 
 const registro = async (req,res)=>{
 
@@ -23,7 +23,43 @@ const registro = async (req,res)=>{
 
 }
 
+const confirmMail = async (req, res) => {
+    try {
+        //Paso 1
+        const { token } = req.params
+        //Paso 2
+        const docenteBDD = await Docente.findOne({ token })
+        if (!docenteBDD) return res.status(400).json({ msg: "Token no válido" })
+        //Paso 3
+        docenteBDD.token = null
+        docenteBDD.confirmEmail = true
+        await docenteBDD.save()
+        //Paso 4
+        res.status(200).json({ msg: "Cuenta confirmada correctamente" })
+    } catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
+const recuperarPassword = async (req, res) => {
+    try {
+        //Paso 1
+        const { email } = req.body
+        //Paso 2
+        const docenteBDD = await Docente.findOne({ email })
+        if (!docenteBDD) return res.status(400).json({ msg: "El email no está registrado" })        
+        //Paso 3
+        const token = await docenteBDD.createToken()
+        await sendMailToRecoveryPassword(email, token)
+        //Paso 4
+        res.status(200).json({ msg: "Revisa tu correo electrónico para restablecer tu contraseña" })
+    } catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
 
 export {
-    registro
+    registro,
+    confirmMail,
+    recuperarPassword
 }
