@@ -28,7 +28,7 @@ const sendMailToRecoveryPassword = (userMail, token) => {
         `
             <h1>Restablece tu contraseña</h1>
             <p>Hola, haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-            <a href="${process.env.URL_BACKEND}reset-password/${token}">
+            <a href="${process.env.URL_BACKEND}recuperarpassword/${token}">
 
             Restablecer contraseña
             </a>

@@ -23,43 +23,82 @@ const registro = async (req,res)=>{
 
 }
 
-const confirmMail = async (req, res) => {
+const confirmarMail = async (req, res) => {
     try {
-        //Paso 1
         const { token } = req.params
-        //Paso 2
         const docenteBDD = await Docente.findOne({ token })
-        if (!docenteBDD) return res.status(400).json({ msg: "Token no válido" })
-        //Paso 3
+        if (!docenteBDD) return res.status(404).json({ msg: "Token inválido o cuenta ya confirmada" })
         docenteBDD.token = null
         docenteBDD.confirmEmail = true
         await docenteBDD.save()
-        //Paso 4
-        res.status(200).json({ msg: "Cuenta confirmada correctamente" })
+        res.status(200).json({ msg: "Cuenta confirmada, ya puedes iniciar sesión" })
+
     } catch (error) {
+    console.error(error)
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
-
 const recuperarPassword = async (req, res) => {
+
     try {
-        //Paso 1
         const { email } = req.body
-        //Paso 2
+        if (!email) return res.status(400).json({ msg: "Debes ingresar un correo electrónico" })
         const docenteBDD = await Docente.findOne({ email })
-        if (!docenteBDD) return res.status(400).json({ msg: "El email no está registrado" })        
-        //Paso 3
-        const token = await docenteBDD.createToken()
+        if (!docenteBDD) return res.status(404).json({ msg: "El usuario no se encuentra registrado" })
+        const token = docenteBDD.createToken()
+        docenteBDD.token = token
         await sendMailToRecoveryPassword(email, token)
-        //Paso 4
-        res.status(200).json({ msg: "Revisa tu correo electrónico para restablecer tu contraseña" })
+        await docenteBDD.save()
+        res.status(200).json({ msg: "Revisa tu correo electrónico para reestablecer tu cuenta" })
+        
     } catch (error) {
+        console.error(error)
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
 
+
+const comprobarTokenPassword = async (req,res)=>{
+    try {
+        const {token} = req.params
+        const docenteBDD = await Docente.findOne({token})
+        if (!docenteBDD) {
+            return res.status(404).json({ msg: "Token inválido o expirado" })
+        }
+        res.status(200).json({ msg: "Token confirmado, puedes crear tu nueva contraseña" })
+    
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
+
+
+
+const crearNuevoPassword = async (req,res)=>{
+
+    try {
+        const{password,confirmpassword} = req.body
+        const { token } = req.params
+        if (!password || !confirmpassword) {return res.status(400).json({ msg: "Todos los campos son obligatorios" })}
+        if(password !== confirmpassword) return res.status(404).json({msg:"Los passwords no coinciden"})
+        const docenteBDD = await Docente.findOne({token})
+        if(!docenteBDD) return res.status(404).json({msg:"No se puede validar la cuenta"})
+        docenteBDD.token = null
+        docenteBDD.password = await docenteBDD.encryptPassword(password)
+        await docenteBDD.save()
+        res.status(200).json({msg:"Felicitaciones, ya puedes iniciar sesión con tu nuevo password"}) 
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
 export {
     registro,
-    confirmMail,
-    recuperarPassword
+    confirmarMail,
+    recuperarPassword,
+    comprobarTokenPassword,
+    crearNuevoPassword
 }
