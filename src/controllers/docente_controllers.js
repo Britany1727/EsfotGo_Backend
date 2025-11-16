@@ -95,10 +95,39 @@ const crearNuevoPassword = async (req,res)=>{
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
+
+const login = async (req,res)=>{
+    try {
+        const {email,password} = req.body
+        if (Object.values(req.body).includes("")) return res.status(404).json({msg:"Debes llenar todos los campos"})
+        const docenteBDD = await Docente.findOne({email}).select("-status -__v -token -updatedAt -createdAt")
+        if(!docenteBDD) return res.status(404).json({msg:"El usuario no se encuentra registrado"})
+        if(!docenteBDD.confirmEmail) return res.status(403).json({msg:"Debes verificar tu cuenta antes de iniciar sesión"})
+        const verificarPassword = await docenteBDD.matchPassword(password)
+        if(!verificarPassword) return res.status(401).json({msg:"El password no es correcto"})
+        const {nombre,apellido,direccion,telefono,_id,rol} = docenteBDD
+        res.status(200).json({
+            rol,
+            nombre,
+            apellido,
+            direccion,
+            telefono,
+            _id,
+            email:docenteBDD.email
+        })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+
+}
+
 export {
     registro,
     confirmarMail,
     recuperarPassword,
     comprobarTokenPassword,
-    crearNuevoPassword
+    crearNuevoPassword,
+    login
 }
