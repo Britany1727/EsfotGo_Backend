@@ -14,14 +14,14 @@ router.get('/recuperarpassword/:token',comprobarTokenPassword)
 
 router.post('/nuevopassword/:token',crearNuevoPassword)
 
-router.post('/docente/login',login) 
+router.post('/login',login) 
 
-router.get('/docente/perfil',verificarTokenJWT,perfil)
+router.get('/perfil',verificarTokenJWT,perfil)
 
-router.put('/docente/perfil/:id',verificarTokenJWT,actualizarPerfil)
+router.put('/actualizarperfil/:id',verificarTokenJWT,actualizarPerfil)
 
-router.put('/docente/password/:id',verificarTokenJWT,actualizarPassword)
+router.put('/actualizarpassword/:id',verificarTokenJWT,actualizarPassword)
 
-router.post('/docente/evento',verificarTokenJWT,crearEvento)
+router.post('/evento',verificarTokenJWT,crearEvento)
 
 export default router

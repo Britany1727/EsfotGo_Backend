@@ -14,8 +14,8 @@ const docenteSchema = new Schema({
     },
     celular:{
         type:String,
-        trim:true,
-        default:null
+        required:true,
+        trim:true
     },
     email:{
         type:String,
