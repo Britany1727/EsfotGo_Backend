@@ -27,6 +27,46 @@ const docenteSchema = new Schema({
         type:String,
         required:true
     },
+    Oficina:{
+        type:Schema.Types.ObjectId,
+        ref:"Oficina",
+        default:null
+    },
+    Tutorias:[{
+        type:Schema.Types.ObjectId,
+        ref:"Tutoria"
+    }],
+    horariosDisponibles:[{
+        dia:{
+            type:String,
+            enum:['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+            required:true
+        },
+        horaInicio:{
+            type:String,
+            required:true,
+            validate:{
+                validator: function(v) {
+                    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+                },
+                message: 'Formato de hora inválido. Use HH:MM (ej: 14:30)'
+            }
+        },
+        horaFin:{
+            type:String,
+            required:true,
+            validate:{
+                validator: function(v) {
+                    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+                },
+                message: 'Formato de hora inválido. Use HH:MM (ej: 16:30)'
+            }
+        },
+        disponible:{
+            type:Boolean,
+            default:true
+        }
+    }],
     status:{
         type:Boolean,
         default:true
@@ -45,7 +85,8 @@ const docenteSchema = new Schema({
     }
 
 },{
-    timestamps:true
+    timestamps:true,
+    collection: 'docentes'
 })
 
 // Método para cifrar el password

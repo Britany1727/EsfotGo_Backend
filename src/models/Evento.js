@@ -29,9 +29,15 @@ const eventoSchema = new Schema({
         type:String,
         required:true,
         trim:true   
+    },
+    imagen:{
+        type:String,
+        required:false,
+        trim:true
     }
 },{
-    timestamps:true
+    timestamps:true,
+    collection: 'eventos'
 })  
 
 export default model('Evento',eventoSchema)

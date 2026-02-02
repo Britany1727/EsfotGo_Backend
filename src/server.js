@@ -2,40 +2,74 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import routerAdmins from './routers/Admin_routes.js';
 import routerDocentes from './routers/Docente_routes.js';
-
-
+import cloudinary from 'cloudinary'
+import fileUpload from "express-fileupload"
+import connection from './database.js' 
+import passport from 'passport'
+import session from 'express-session' 
+import routerAuth from './routers/auth.js' 
+import router from './routers/User_routes.js';
+import './config/passport.js';
 
 // Inicializaciones
 const app = express()
 dotenv.config()
+connection() // Conectar a la BD
 
+// Configuraciones Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
-// Configuraciones 
+// --- MIDDLEWARES (ORDEN CRÍTICO) ---
 
+// 1. CORS debe permitir credenciales para las cookies de sesión
+app.use(cors({
+    origin: "http://localhost:5173", // URL de tu Vite/React
+    credentials: true
+}));
 
-
-// Middlewares 
 app.use(express.json())
-app.use(cors())
 
+// 2. Configuración de Sesión (Indispensable para Google)
+app.use(session({
+    secret: 'esfotgo_secret', 
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: false, // true solo si usas HTTPS
+        httpOnly: true 
+    }
+}));
 
+// 3. Passport debe ir DESPUÉS de la sesión
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : './uploads'
+}))
 
 // Variables globales
-app.set('port',process.env.PORT || 3000)
+app.set('port', process.env.PORT || 3000)
 
+// --- RUTAS ---
 
+app.get('/', (req, res) => res.send("Server on"))
 
-// Ruta principal
-app.get('/',(req,res)=>res.send("Server on"))
+// IMPORTANTE: Esta ruta debe coincidir con el href del frontend
+app.use('/auth', routerAuth) 
 
-// Rutas para Docentes
+app.use('/api', router)
+app.use('/api/admin', routerAdmins)
+app.use('/api/docente', routerDocentes)
 
-app.use('/api',routerDocentes)
+// Manejo de 404
+app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"))
 
-// Manejo de una ruta que no sea encontrada
-app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
-
-
-// Exportar la instancia de express por medio de app
-export default  app
+export default app;

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
 import Docente from "../models/Docente.js"
+import Admin from "../models/Admin.js"
 
 
 /**
@@ -22,11 +23,18 @@ const verificarTokenJWT = async (req, res, next) => {
     try {
         const token = authorization.split(" ")[1]
         const { id, rol } = jwt.verify(token,process.env.JWT_SECRET)
-        if (rol === "docente") {
+        if (rol === "admin") {
+            const adminBDD = await Admin.findById(id).lean().select("-password")
+            if (!adminBDD) return res.status(401).json({ msg: "Usuario no encontrado" })
+            req.adminHeader = adminBDD
+            next()
+        }else if (rol === "docente") {
             const docenteBDD = await Docente.findById(id).lean().select("-password")
             if (!docenteBDD) return res.status(401).json({ msg: "Usuario no encontrado" })
             req.docenteHeader = docenteBDD
-            next()
+            next()    
+        } else {
+            next(new Error("Rol no válido"))
         }
     } catch (error) {
         console.log(error)

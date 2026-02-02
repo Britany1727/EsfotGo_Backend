@@ -1,11 +1,12 @@
-
 import Docente from "../models/Docente.js"
 import { sendMailToRecoveryPassword, sendMailToRegister } from "../helpers/sendMail.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
 import mongoose from "mongoose"
 import Evento from "../models/Evento.js"
+import Oficina from "../models/Oficinas.js"
+import Aula from "../models/Aulas.js"
 
-const registro = async (req,res)=>{
+const registroDocente = async (req,res)=>{
 
     try {
 
@@ -26,7 +27,7 @@ const registro = async (req,res)=>{
 
 }
 
-const confirmarMail = async (req, res) => {
+const confirmarMailDocente = async (req, res) => {
     try {
         const { token } = req.params
         const docenteBDD = await Docente.findOne({ token })
@@ -40,7 +41,7 @@ const confirmarMail = async (req, res) => {
         res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
     }
 }
-const recuperarPassword = async (req, res) => {
+const recuperarPasswordDocente = async (req, res) => {
 
     try {
         const { email } = req.body
@@ -59,7 +60,7 @@ const recuperarPassword = async (req, res) => {
 }
 
 
-const comprobarTokenPassword = async (req,res)=>{
+const comprobarTokenPasswordDocente = async (req,res)=>{
     try {
         const {token} = req.params
         const docenteBDD = await Docente.findOne({token})
@@ -76,7 +77,7 @@ const comprobarTokenPassword = async (req,res)=>{
 
 
 
-const crearNuevoPassword = async (req,res)=>{
+const crearNuevoPasswordDocente = async (req,res)=>{
 
     try {
         const{password,confirmpassword} = req.body
@@ -95,7 +96,7 @@ const crearNuevoPassword = async (req,res)=>{
     }
 }
 
-const login = async (req,res)=>{
+const loginDocente = async (req,res)=>{
     try {
         const {email,password} = req.body
         if (Object.values(req.body).includes("")) return res.status(404).json({msg:"Debes llenar todos los campos"})
@@ -124,12 +125,12 @@ const login = async (req,res)=>{
 
 }
 
-const perfil =(req,res)=>{
+const perfilDocente =(req,res)=>{
 	const {token,confirmEmail,createdAt,updatedAt,__v,...datosPerfil} = req.docenteHeader
     res.status(200).json(datosPerfil)
 }
 
-const actualizarPerfil = async (req,res)=>{
+const actualizarPerfilDocente = async (req,res)=>{
 
     try {
         const {id} = req.params
@@ -159,7 +160,7 @@ const actualizarPerfil = async (req,res)=>{
     }
 }
 
-const actualizarPassword = async (req,res)=>{
+const actualizarPasswordDocente = async (req,res)=>{
 
     try {
         const {_id} = req.params
@@ -180,9 +181,20 @@ const actualizarPassword = async (req,res)=>{
 const crearEvento = async (req,res)=>{
 
     try {
-        const {nombre,descripcion,fecha,hora,encargado,ubicacion} = req.body
+        const {nombre,descripcion,fecha,hora,encargado,ubicacion,imagen} = req.body
         if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
         const nuevoEvento = new Evento(req.body)
+
+        if (req.files?.subirImagenEvento) {
+            const { secure_url, public_id } = await subirImagenEvento(req.files.subirImagenEvento.tempFilePath)
+            nuevoEvento.imagen = secure_url
+        }
+
+        if (req.body.subirBase64Evento) {
+            const secure_url = await subirBase64Evento(req.body.subirBase64Evento)
+            nuevoEvento.imagen = secure_url
+        }
+
         await nuevoEvento.save()
         res.status(200).json({msg:"Evento creado correctamente"})
     } catch (error) {
@@ -190,15 +202,139 @@ const crearEvento = async (req,res)=>{
     }
 }
 
+const actualizarEvento = async (req,res)=>{
+
+    try {
+        const {id} = req.params
+        const {nombre,descripcion,fecha,hora,encargado,ubicacion,imagen} = req.body
+        if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
+        const eventoBDD = await Evento.findById(id)
+        if(!eventoBDD) return res.status(404).json({msg:"El evento no existe"})
+        eventoBDD.nombre = nombre || eventoBDD.nombre
+        eventoBDD.descripcion = descripcion || eventoBDD.descripcion
+        eventoBDD.fecha = fecha || eventoBDD.fecha
+        eventoBDD.hora = hora || eventoBDD.hora
+        eventoBDD.encargado = encargado || eventoBDD.encargado
+        eventoBDD.ubicacion = ubicacion || eventoBDD.ubicacion
+
+        if (req.files?.subirImagenEvento) {
+            const { secure_url, public_id } = await subirImagenEvento(req.files.subirImagenEvento.tempFilePath)
+            eventoBDD.imagen = secure_url
+        }
+        if (req.body.subirBase64Evento) {
+            const secure_url = await subirBase64Evento(req.body.subirBase64Evento)
+            eventoBDD.imagen = secure_url
+        }
+        await eventoBDD.save()
+        res.status(200).json({msg:"Evento actualizado correctamente"})
+    }   
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
+const eliminarEvento = async (req,res)=>{
+
+    try {
+        const {id} = req.params
+        const eventoBDD = await Evento.findById(id) 
+        if(!eventoBDD) return res.status(404).json({msg:"El evento no existe"})
+        await eventoBDD.deleteOne()
+        res.status(200).json({msg:"Evento eliminado correctamente"})
+    }
+    catch (error) {     
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
+const listarEventos = async (req,res)=>{
+
+    try {
+        const eventosBDD = await Evento.find().sort({createdAt:-1})
+        res.status(200).json(eventosBDD)
+    } catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }
+}
+
+const verEvento = async (req,res)=>{
+
+    try {
+        const {id} = req.params
+        const eventoBDD = await Evento.findById(id)
+        if(!eventoBDD) return res.status(404).json({msg:"El evento no existe"})
+        res.status(200).json(eventoBDD)
+    }
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+    }  
+
+}
+
+const listarAulas = async (req, res) => {
+    try {
+        const aulas = await Aula.find().where({ status: true });
+        res.status(200).json(aulas);
+    }
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+const verAula = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const aula = await Aula.findById(id);
+        if (!aula) return res.status(404).json({ msg: "El aula no existe" });
+        res.status(200).json(aula);
+    }
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+
+const listarOficinas = async (req, res) => {
+    try {
+        const oficinas = await Oficina.find().where({ status: true });
+        res.status(200).json(oficinas);
+    }
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+const verOficina = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const oficina = await Oficina.findById(id);
+        if (!oficina) return res.status(404).json({ msg: "La oficina no existe" });
+        res.status(200).json(oficina);
+    }
+    catch (error) {
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` });
+    }
+}
+
+
+
 export {
-    registro,
-    confirmarMail,
-    recuperarPassword,
-    comprobarTokenPassword,
-    crearNuevoPassword,
-    login,
-    perfil,
-    actualizarPerfil,
-    actualizarPassword,
-    crearEvento
+    registroDocente,
+    confirmarMailDocente,
+    recuperarPasswordDocente,
+    comprobarTokenPasswordDocente,
+    crearNuevoPasswordDocente,
+    loginDocente,
+    perfilDocente,
+    actualizarPerfilDocente,
+    actualizarPasswordDocente,
+    crearEvento,
+    actualizarEvento,
+    eliminarEvento,
+    listarEventos,
+    verEvento,
+    listarAulas,
+    verAula,
+    listarOficinas,
+    verOficina
 }
