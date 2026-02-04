@@ -12,6 +12,12 @@ const aulaSchema = new Schema({
         required: true, 
         trim: true
     },
+    tipo: {
+        type: String,
+        required: true,
+        enum: ['aula', 'laboratorio'],
+        trim: true
+    },
     edificio: {
         type: Schema.Types.ObjectId,  // Referencia al modelo Edificio
         ref: 'Edificio',

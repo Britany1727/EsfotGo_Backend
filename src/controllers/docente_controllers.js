@@ -130,33 +130,36 @@ const perfilDocente =(req,res)=>{
     res.status(200).json(datosPerfil)
 }
 
-const actualizarPerfilDocente = async (req,res)=>{
-
+const actualizarPerfilDocente = async (req, res) => {
     try {
-        const {id} = req.params
-        const {nombre,apellido,direccion,celular,email} = req.body
-        if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(400).json({msg:`ID inválido: ${id}`})
-        const docenteBDD = await Docente.findById(id)
-        if(!docenteBDD) return res.status(404).json({ msg: `No existe el veterinario con ID ${id}` })
-        if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Debes llenar todos los campos"})
-        if (docenteBDD.email !== email)
-        {
-            const emailExistente  = await Docente.findOne({email})
-            if (emailExistente )
-            {
-                return res.status(404).json({msg:`El email ya se encuentra registrado`})  
-            }
+        const { id } = req.params;
+
+        // Si req.body no existe, esto lanzará el error de tu captura
+        if (!req.body) {
+            return res.status(400).json({ msg: "No se recibieron datos en el cuerpo de la petición" });
         }
-        docenteBDD.nombre = nombre ?? docenteBDD.nombre
-        docenteBDD.apellido = apellido ?? docenteBDD.apellido
-        docenteBDD.direccion = direccion ?? docenteBDD.direccion
-        docenteBDD.celular = celular ?? docenteBDD.celular
-        docenteBDD.email = email ?? docenteBDD.email
-        await docenteBDD.save()
-        res.status(200).json(docenteBDD)
-        
+
+        const { nombre, apellido, direccion, telefono, email } = req.body; // Cambia 'celular' por 'telefono' si es necesario
+
+        if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: "ID inválido" });
+
+        const docenteBDD = await Docente.findById(id);
+        if (!docenteBDD) return res.status(404).json({ msg: "No existe el docente" });
+
+        // Actualización
+        docenteBDD.nombre = nombre || docenteBDD.nombre;
+        docenteBDD.apellido = apellido || docenteBDD.apellido;
+        docenteBDD.direccion = direccion || docenteBDD.direccion;
+        docenteBDD.telefono = telefono || docenteBDD.telefono; 
+        docenteBDD.email = email || docenteBDD.email;
+
+        await docenteBDD.save();
+        res.status(200).json(docenteBDD);
+
     } catch (error) {
-        res.status(500).json({ msg: `❌ Error en el servidor - ${error}` })
+        // Imprime el error en la consola de Node para rastrearlo mejor
+        console.error("Error en actualizarPerfilDocente:", error);
+        res.status(500).json({ msg: `❌ Error en el servidor - ${error.message}` });
     }
 }
 

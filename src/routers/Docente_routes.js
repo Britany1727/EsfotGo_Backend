@@ -4,31 +4,30 @@ import { verificarTokenJWT } from '../middlewares/JWT.js'
 const routerDocentes = Router()
 
 //REGISTRO Y AUTENTICACIÓN
-routerDocentes.post('/registro',registroDocente)
-routerDocentes.get('/confirmar/:token',confirmarMailDocente)
-routerDocentes.post('/recuperarpassword',recuperarPasswordDocente)      
-routerDocentes.get('/recuperarpassword/:token',comprobarTokenPasswordDocente) 
-routerDocentes.post('/nuevopassword/:token',crearNuevoPasswordDocente)
-
+routerDocentes.post('/docente/registro',registroDocente)
+routerDocentes.get('/docenteconfirmar/:token',confirmarMailDocente)
+routerDocentes.post('/docente/recuperarpassword',recuperarPasswordDocente)      
+routerDocentes.get('/docente/recuperarpassword/:token',comprobarTokenPasswordDocente) 
+routerDocentes.post('/docente/nuevopassword/:token',crearNuevoPasswordDocente)
 //AUTENTICACIÓN
-routerDocentes.post('/login',loginDocente) 
-routerDocentes.get('/perfil',verificarTokenJWT,perfilDocente)
-routerDocentes.put('/actualizarperfil/:id',verificarTokenJWT,actualizarPerfilDocente)
-routerDocentes.put('/actualizarpassword/:id',verificarTokenJWT,actualizarPasswordDocente)
+routerDocentes.post('/docente/login',loginDocente) 
+routerDocentes.get('/docente/perfil',verificarTokenJWT,perfilDocente)
+routerDocentes.put('/docente/actualizarperfil/:id',verificarTokenJWT,actualizarPerfilDocente)
+routerDocentes.put('/docente/actualizarpassword/:id',verificarTokenJWT,actualizarPasswordDocente)
 
 
 //EVENTOS
-routerDocentes.post('/evento',verificarTokenJWT,crearEvento)
-routerDocentes.put('/actualizarevento/:id',verificarTokenJWT,actualizarEvento)
-routerDocentes.delete('/eliminarevento/:id',verificarTokenJWT,eliminarEvento)
-routerDocentes.get('/eventos',verificarTokenJWT,listarEventos)
+routerDocentes.post('/evento',crearEvento)
+routerDocentes.put('/actualizarevento/:id',actualizarEvento)
+routerDocentes.delete('/eliminarevento/:id',eliminarEvento)
+routerDocentes.get('/eventos',listarEventos)
 
 //OFICINAS
-routerDocentes.get('/oficinas',verificarTokenJWT,listarOficinas)
-routerDocentes.get('/veroficina/:id',verificarTokenJWT,verOficina)
+routerDocentes.get('/oficinas',listarOficinas)
+routerDocentes.get('/veroficina/:id',verOficina)
 //AULAS
-routerDocentes.get('/aulas',verificarTokenJWT,listarAulas)
-routerDocentes.get('/veraula/:id',verificarTokenJWT,verAula)
+routerDocentes.get('/aulas',listarAulas)
+routerDocentes.get('/veraula/:id',verAula)
 
 
 export default routerDocentes

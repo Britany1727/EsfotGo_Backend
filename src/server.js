@@ -26,7 +26,8 @@ cloudinary.config({
 })
 
 // --- MIDDLEWARES (ORDEN CRÍTICO) ---
-
+app.use(express.json()) // Permite leer JSON en el body
+app.use(express.urlencoded({ extended: true }))
 // 1. CORS debe permitir credenciales para las cookies de sesión
 app.use(cors({
     origin: "http://localhost:5173", // URL de tu Vite/React
@@ -66,8 +67,8 @@ app.get('/', (req, res) => res.send("Server on"))
 app.use('/auth', routerAuth) 
 
 app.use('/api', router)
-app.use('/api/admin', routerAdmins)
-app.use('/api/docente', routerDocentes)
+app.use('/api', routerAdmins)
+app.use('/api', routerDocentes)
 
 // Manejo de 404
 app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"))

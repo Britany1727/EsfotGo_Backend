@@ -12,7 +12,7 @@ const docenteSchema = new Schema({
         required:true,
         trim:true
     },
-    celular:{
+    telefono:{
         type:String,
         required:true,
         trim:true
@@ -39,7 +39,7 @@ const docenteSchema = new Schema({
     horariosDisponibles:[{
         dia:{
             type:String,
-            enum:['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+            enum:['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
             required:true
         },
         horaInicio:{
@@ -67,6 +67,10 @@ const docenteSchema = new Schema({
             default:true
         }
     }],
+    informacion:{
+        type:String,
+        default:''
+    },
     status:{
         type:Boolean,
         default:true

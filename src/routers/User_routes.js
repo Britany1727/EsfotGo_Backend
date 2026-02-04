@@ -22,27 +22,26 @@ router.put('/actualizarperfil/:id',verificarTokenJWT,actualizarPerfil)
 router.put('/actualizarpassword/:id',verificarTokenJWT,actualizarPassword)
 
 //EVENTOS
-router.post('/evento',verificarTokenJWT,crearEvento)
-router.put('/actualizarevento/:id',verificarTokenJWT,actualizarEvento)
-router.delete('/eliminarevento/:id',verificarTokenJWT,eliminarEvento)
-router.get('/eventos',verificarTokenJWT,listarEventos)
-
+router.post('/evento',crearEvento)
+router.put('/actualizarevento/:id',actualizarEvento)
+router.delete('/eliminarevento/:id',eliminarEvento)
+router.get('/eventos',listarEventos)
 
 //OFICINAS
 
-router.get('/oficinas',verificarTokenJWT,listarOficinas)
-router.get('/veroficina/:id',verificarTokenJWT,verOficina)
+router.get('/oficinas',listarOficinas)
+router.get('/veroficina/:id',verOficina)
 
 
 
 //AULAS
-router.get('/aulas',verificarTokenJWT,listarAulas)
-router.get('/veraula/:id',verificarTokenJWT,verAula)
+router.get('/aulas',listarAulas)
+router.get('/veraula/:id',verAula)
 
 
 //DOCENTES
-router.get('/docentes',verificarTokenJWT,listarDocentes)
-router.get('/verdocente/:id',verificarTokenJWT,verDocente)
+router.get('/docentes',listarDocentes)
+router.get('/verdocente/:id',verDocente)
 
 
 export default router
